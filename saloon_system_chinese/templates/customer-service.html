@@ -1,0 +1,181 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalonHome | Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg sticky-top app-navbar">
+            <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'home' %}">SalonHome</a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">Home</a>
+                {% if request.user.is_staff %}<a href="{% url 'admin_dashboard' %}" class="btn btn-outline-brand btn-sm">Dashboard</a>{% endif %}
+                <a href="{% url 'logout' %}" class="btn btn-outline-brand btn-sm">Log out</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="page-section">
+            <div class="container">
+                {% if messages %}{% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>{% endfor %}{% endif %}
+                <div class="page-banner mb-4">
+                    <div class="row g-4 align-items-center">
+                        <div class="col-lg-8">
+                            <span class="eyebrow"><i class="bi bi-calendar-week"></i> Customer booking flow</span>
+                            <h1 class="section-title">Choose a service, submit a booking request, and track progress easily.</h1>
+                            <p class="lead-copy mb-0">Complete a home salon booking in a few steps and monitor any status changes.</p>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="status-summary justify-content-lg-end">
+                                <span class="status-pill"><i class="bi bi-patch-check-fill"></i> Verified professionals</span>
+                                <span class="status-pill"><i class="bi bi-geo-alt"></i> Home service</span>
+                                <span class="status-pill"><i class="bi bi-hourglass-split"></i> Trackable status</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <section class="page-section pt-0" id="services">
+                    <div class="section-intro">
+                        <span class="eyebrow"><i class="bi bi-scissors"></i> Step 1</span>
+                        <h2 class="section-title">Choose the service that fits your booking.</h2>
+                    </div>
+                    <div class="row g-4">
+                        {% for service in services %}
+                            <div class="col-md-6 col-xl-4">
+                                <article class="service-card h-100">
+                                    <img class="service-image" src="{{ service.image_url }}" alt="{{ service.name }}">
+                                    <div class="icon-chip"><i class="bi bi-scissors"></i></div>
+                                    <h5>{{ service.name }}</h5>
+                                    <p class="text-muted-soft mb-2">{{ service.description|truncatechars:90 }}</p>
+                                    <span class="status-pill">$ {{ service.price }}</span>
+                                    <a href="{% url 'customer_booking_page' %}?service={{ service.pk }}#booking-form" class="btn btn-outline-brand btn-sm mt-3 w-100">Choose this service</a>
+                                </article>
+                            </div>
+                        {% empty %}
+                            <div class="col-12"><div class="surface-card soft"><p class="mb-0 text-muted-soft">No services are available for booking yet.</p></div></div>
+                        {% endfor %}
+                    </div>
+                </section>
+                <section class="page-section pt-0" id="hairdressers">
+                    <div class="section-intro">
+                        <span class="eyebrow"><i class="bi bi-person-badge"></i> Step 2</span>
+                        <h2 class="section-title">Review verified hairdressers before confirming your booking.</h2>
+                        <p class="lead-copy">Hairdressers are assigned by the admin team, but you can review who is available.</p>
+                    </div>
+                    <div class="row g-4">
+                        {% for hairdresser in hairdressers %}
+                            <div class="col-md-6 col-xl-4">
+                                <article class="hairdresser-card">
+                                    <div class="profile-badge"><img src="{{ hairdresser.image_url }}" alt="{{ hairdresser.name }}"></div>
+                                    <h5 class="mb-1">{{ hairdresser.name }}</h5>
+                                    <p class="text-muted-soft mb-2">{{ hairdresser.specialization }}</p>
+                                    <p class="small text-muted-soft mb-3">{{ hairdresser.experience }}</p>
+                                    <span class="verified-badge"><i class="bi bi-patch-check-fill"></i> Verified</span>
+                                </article>
+                            </div>
+                        {% empty %}
+                            <div class="col-12"><div class="surface-card soft"><p class="mb-0 text-muted-soft">No verified hairdressers are available yet.</p></div></div>
+                        {% endfor %}
+                    </div>
+                </section>
+                <section class="page-section pt-0">
+                    <div class="row g-4">
+                        <div class="col-xl-7">
+                            <div class="form-card" id="booking-form">
+                                <div class="section-intro mb-4">
+                                    <span class="eyebrow"><i class="bi bi-ui-checks-grid"></i> Step 3</span>
+                                    <h2 class="section-title">Fill in your booking details.</h2>
+                                </div>
+                                {% if selected_service %}
+                                    <div class="alert alert-info mb-4">
+                                        <strong>Selected service:</strong> {{ selected_service.name }}
+                                    </div>
+                                {% endif %}
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="form-label">Full name</label>{{ form.full_name }}</div>
+                                        <div class="col-md-6"><label class="form-label">Phone</label>{{ form.phone }}</div>
+                                        <div class="col-md-6"><label class="form-label">Service</label>{{ form.service }}</div>
+                                        <div class="col-md-6"><label class="form-label">Payment method</label>{{ form.payment_method }}</div>
+                                        <div class="col-md-6"><label class="form-label">Appointment date</label>{{ form.appointment_date }}</div>
+                                        <div class="col-md-6"><label class="form-label">Appointment time</label>{{ form.appointment_time }}</div>
+                                        <div class="col-12"><label class="form-label">Location</label>{{ form.location }}</div>
+                                        <div class="col-12"><label class="form-label">Notes</label>{{ form.notes }}</div>
+                                        <div class="col-12"><button class="btn btn-brand w-100" type="submit">Submit booking</button></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-xl-5">
+                            <div class="surface-card soft">
+                                <h5 class="mb-3">My bookings</h5>
+                                <div class="mini-list">
+                                    {% for booking in bookings %}
+                                        <div class="mini-list-item d-block w-100">
+                                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                                <div>
+                                                    <strong>{{ booking.service.name }}</strong>
+                                                    <div class="text-muted-soft small">Amount: KSh {{ booking.service.price }}</div>
+                                                    <div class="text-muted-soft small">{{ booking.appointment_date }} {{ booking.appointment_time|time:"H:i" }}</div>
+                                                    <div class="text-muted-soft small">{{ booking.get_status_display }}</div>
+                                                    <div class="text-muted-soft small">Payment: {{ booking.payment_status }}</div>
+                                                    {% if booking.hairdresser %}<div class="text-muted-soft small">Hairdresser: {{ booking.hairdresser.name }}</div>{% endif %}
+                                                </div>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    {% if booking.payment_status == 'Paid' %}
+                                                        <span class="badge bg-success-subtle text-success-emphasis">Paid</span>
+                                                    {% else %}
+                                                        <button class="btn btn-outline-brand btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#mpesaPayment{{ booking.pk }}">Pay now</button>
+                                                    {% endif %}
+                                                    <form method="post" action="{% url 'booking_delete' booking.pk %}">{% csrf_token %}<button class="btn btn-outline-danger btn-sm" type="submit">Delete</button></form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% if booking.payment_status != 'Paid' %}
+                                            <div class="modal fade" id="mpesaPayment{{ booking.pk }}" tabindex="-1" aria-labelledby="mpesaPaymentLabel{{ booking.pk }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <form method="post" action="{% url 'pay_booking' booking.pk %}">
+                                                            {% csrf_token %}
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="mpesaPaymentLabel{{ booking.pk }}">Pay with M-Pesa</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p>We will send an M-Pesa payment prompt for <strong>KSh {{ booking.service.price }}</strong>. Enter your phone number, then approve the prompt and enter your M-Pesa PIN on your phone.</p>
+                                                                <label class="form-label" for="mpesaPhone{{ booking.pk }}">M-Pesa phone number</label>
+                                                                <input class="form-control" id="mpesaPhone{{ booking.pk }}" name="phone_number" type="tel" value="{{ booking.phone }}" placeholder="0712345678" autocomplete="tel" required>
+                                                                <div class="form-text">Use a Kenyan number, for example 0712345678. Your PIN is entered only on your phone, never on this website.</div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                <button class="btn btn-brand" type="submit">Send payment prompt</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% empty %}
+                                        <div class="mini-list-item"><span class="text-muted-soft">You do not have any bookings yet.</span></div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalonHome | Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+</head>
+<body>
+    <div class="app-shell">
+        <nav class="navbar navbar-expand-lg sticky-top app-navbar">
+            <div class="container">
+                <a class="navbar-brand fw-bold" href="{% url 'home' %}">SalonHome</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-3">
+                        <li class="nav-item"><a class="nav-link active" href="#top">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#hairdressers">Hairdressers</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#flow">Booking Flow</a></li>
+                        {% if request.user.is_authenticated %}
+                            {% if request.user.is_staff %}
+                                <li class="nav-item"><a class="btn btn-brand px-4" href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                            {% else %}
+                                <li class="nav-item"><a class="btn btn-brand px-4" href="{% url 'customer_booking_page' %}">Book Now</a></li>
+                            {% endif %}
+                        {% else %}
+                            <li class="nav-item"><a class="btn btn-brand px-4" href="{% url 'register' %}">Book Now</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <main id="top">
+            <section class="hero-section bg-surface">
+                <div class="container">
+                    <div class="row hero-grid g-4 g-xl-5">
+                        <div class="col-lg-6 hero-copy">
+                            <span class="eyebrow"><i class="bi bi-heart-pulse"></i> Simple booking platform</span>
+                            <h1 class="display-title">Home salon appointments made clearer from booking to completion.</h1>
+                            <p class="lead-copy mb-4">SalonHome keeps the booking flow simple: review verified hairdressers, choose services, submit a request, and track the order status in one place.</p>
+                            <div class="hero-actions mb-4">
+                                <a href="{% if request.user.is_authenticated %}{% url 'customer_booking_page' %}{% else %}{% url 'register' %}{% endif %}" class="btn btn-brand px-4">Start booking</a>
+                                <a href="#services" class="btn btn-outline-brand px-4">View services</a>
+                            </div>
+                            <div class="metric-grid">
+                                <div class="metric-card"><strong>{{ services|length }}</strong><span>services</span></div>
+                                <div class="metric-card"><strong>Verified</strong><span>hairdressers</span></div>
+                                <div class="metric-card"><strong>6</strong><span>status stages</span></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="hero-visual">
+                                <img class="hero-image" src="https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1200&q=80" alt="Home salon service">
+                            </div>
+                            <div class="hero-overlay-card">
+                                <div class="d-flex justify-content-between align-items-start gap-3">
+                                    <div>
+                                        <p class="mb-1 fw-semibold">Simple workflow</p>
+                                        <p class="mb-0 text-muted-soft small">Customers submit requests, staff assign a hairdresser, and the order progress stays visible.</p>
+                                    </div>
+                                    <span class="soft-badge"><i class="bi bi-patch-check-fill"></i> Verified</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page-section" id="services">
+                <div class="container">
+                    <div class="section-intro">
+                        <span class="eyebrow"><i class="bi bi-scissors"></i> Services</span>
+                        <h2 class="section-title">Clear pricing and simple browsing make it easy to choose the right service.</h2>
+                        <p class="lead-copy">Pick the service you need and continue to booking.</p>
+                    </div>
+                    <div class="row g-4">
+                        {% for service in services %}
+                            <div class="col-md-6 col-xl-4">
+                                <article class="service-card">
+                                    <img class="service-image" src="{{ service.image_url }}" alt="{{ service.name }}">
+                                    <div class="icon-chip"><i class="bi bi-scissors"></i></div>
+                                    <h5>{{ service.name }}</h5>
+                                    <p class="text-muted-soft mb-2">{{ service.description|truncatechars:95 }}</p>
+                                    <span class="status-pill">$ {{ service.price }}</span>
+                                </article>
+                            </div>
+                        {% empty %}
+                            <div class="col-12"><div class="surface-card soft"><p class="mb-0 text-muted-soft">No services are available yet.</p></div></div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="page-section bg-surface" id="hairdressers">
+                <div class="container">
+                    <div class="section-intro">
+                        <span class="eyebrow"><i class="bi bi-people"></i> Hairdressers</span>
+                        <h2 class="section-title">Verified professionals are easy to review before you book.</h2>
+                        <p class="lead-copy">Browse available specialists and book with confidence.</p>
+                    </div>
+                    <div class="row g-4">
+                        {% for hairdresser in hairdressers %}
+                            <div class="col-md-6 col-xl-4">
+                                <article class="hairdresser-card">
+                                    <div class="profile-badge"><img src="{{ hairdresser.image_url }}" alt="{{ hairdresser.name }}"></div>
+                                    <h5 class="mb-1">{{ hairdresser.name }}</h5>
+                                    <p class="text-muted-soft mb-2">{{ hairdresser.specialization }}</p>
+                                    <p class="small text-muted-soft mb-3">{{ hairdresser.experience }}</p>
+                                    {% if hairdresser.is_verified %}
+                                        <span class="verified-badge"><i class="bi bi-patch-check-fill"></i> Verified</span>
+                                    {% else %}
+                                        <span class="status-pill">Unverified</span>
+                                    {% endif %}
+                                </article>
+                            </div>
+                        {% empty %}
+                            <div class="col-12"><div class="surface-card soft"><p class="mb-0 text-muted-soft">No hairdresser profiles are available yet.</p></div></div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="page-section" id="flow">
+                <div class="container">
+                    <div class="page-banner">
+                        <span class="eyebrow"><i class="bi bi-diagram-3"></i> Booking flow</span>
+                        <h2 class="section-title">The process from request submission to completion is simple and transparent.</h2>
+                        <div class="flow-steps mt-4">
+                            <div class="flow-step"><span class="flow-index">1</span><div><h6 class="mb-1">Choose a service</h6><p class="mb-0 text-muted-soft">Browse the available services and professionals first.</p></div></div>
+                            <div class="flow-step"><span class="flow-index">2</span><div><h6 class="mb-1">Submit a booking</h6><p class="mb-0 text-muted-soft">Provide your full name, time, location, and payment method.</p></div></div>
+                            <div class="flow-step"><span class="flow-index">3</span><div><h6 class="mb-1">Assign a hairdresser</h6><p class="mb-0 text-muted-soft">The admin team assigns the right professional and updates the order.</p></div></div>
+                            <div class="flow-step"><span class="flow-index">4</span><div><h6 class="mb-1">Track progress</h6><p class="mb-0 text-muted-soft">The status stays visible from pending to completed.</p></div></div>
+                        </div>
+                        <div class="hero-actions mt-4">
+                            <a href="{% if request.user.is_authenticated %}{% url 'customer_booking_page' %}{% else %}{% url 'register' %}{% endif %}" class="btn btn-brand px-4">Open booking</a>
+                            <a href="{% url 'login' %}" class="btn btn-outline-brand px-4">Sign in</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

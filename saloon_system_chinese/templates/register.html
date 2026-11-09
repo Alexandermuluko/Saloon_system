@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalonHome | Register</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+</head>
+<body class="bg-app">
+    <main class="login-shell">
+        <div class="container">
+            <div class="login-grid">
+                <div class="login-side">
+                    <span class="eyebrow"><i class="bi bi-person-plus"></i> Customer registration</span>
+                    <h1 class="display-title">Create an account and start booking your home salon service.</h1>
+                    <p class="lead-copy mb-4">Register once to submit a booking and keep track of your own appointments.</p>
+                </div>
+                <div class="login-card align-self-center">
+                    <div class="text-center mb-4">
+                        <div class="icon-chip mx-auto mb-3" style="width:64px;height:64px;"><i class="bi bi-person-circle"></i></div>
+                        <h2 class="section-title h3 mb-2">Create account</h2>
+                        <p class="text-muted-soft mb-0">Fill in the form to continue.</p>
+                    </div>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            {% for field in form %}
+                                <div class="col-12">
+                                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors|join:', ' }}</div>{% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-brand">Register</button>
+                            <a href="{% url 'login' %}" class="btn btn-outline-brand">Sign in</a>
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary">Back home</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

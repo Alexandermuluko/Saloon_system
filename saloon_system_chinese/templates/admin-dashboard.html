@@ -1,0 +1,168 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalonHome | Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar sticky-top app-navbar">
+            <div class="container d-flex justify-content-between align-items-center">
+            <span class="fw-bold">SalonHome Dashboard</span>
+            <div class="d-flex gap-2">
+                <a href="{% url 'service_create' %}" class="btn btn-outline-brand btn-sm">Add service</a>
+                <a href="{% url 'hairdresser_create' %}" class="btn btn-outline-brand btn-sm">Add hairdresser</a>
+                <a href="{% url 'logout' %}" class="btn btn-outline-secondary btn-sm">Log out</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-section">
+        <div class="container admin-layout">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="page-banner">
+                <div class="dashboard-topbar mb-0">
+                    <div>
+                        <span class="eyebrow"><i class="bi bi-speedometer2"></i> Overview</span>
+                        <h1 class="section-title mb-2">Manage services, hairdressers, and bookings in one place.</h1>
+                        <p class="lead-copy mb-0">Check booking status, assign professionals, and update service progress quickly.</p>
+                    </div>
+                    <a href="/admin/" class="btn btn-brand px-4">Open admin backend</a>
+                </div>
+            </div>
+
+            <section class="dashboard-grid">
+                <div class="stat-card"><strong>{{ service_count }}</strong><span>services</span></div>
+                <div class="stat-card"><strong>{{ hairdresser_count }}</strong><span>hairdressers</span></div>
+                <div class="stat-card"><strong>{{ booking_count }}</strong><span>bookings</span></div>
+                <div class="stat-card"><strong>{{ pending_count }}</strong><span>pending</span></div>
+            </section>
+
+            <section class="table-card">
+                <div class="page-topbar">
+                    <div>
+                        <h2 class="h4 mb-1">Services</h2>
+                        <p class="text-muted-soft mb-0">Services available for customers to book from the front desk.</p>
+                    </div>
+                    <a href="{% url 'service_create' %}" class="btn btn-brand btn-sm px-3">Add service</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr><th>Name</th><th>Price</th><th>Description</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for service in services %}
+                                <tr>
+                                    <td>{{ service.name }}</td>
+                                    <td>$ {{ service.price }}</td>
+                                    <td class="text-muted-soft">{{ service.description|truncatechars:80 }}</td>
+                                    <td>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <a href="{% url 'service_update' service.pk %}" class="btn btn-outline-brand btn-sm">Edit</a>
+                                            <form method="post" action="{% url 'service_delete' service.pk %}">
+                                                {% csrf_token %}
+                                                <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="4" class="text-muted-soft">No services available.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="table-card">
+                <div class="page-topbar">
+                    <div>
+                        <h2 class="h4 mb-1">Hairdressers</h2>
+                        <p class="text-muted-soft mb-0">The list of professionals available for assignment.</p>
+                    </div>
+                    <a href="{% url 'hairdresser_create' %}" class="btn btn-brand btn-sm px-3">Add hairdresser</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr><th>Name</th><th>Specialization</th><th>Experience</th><th>Verification</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for hairdresser in hairdressers %}
+                                <tr>
+                                    <td>{{ hairdresser.name }}</td>
+                                    <td>{{ hairdresser.specialization }}</td>
+                                    <td>{{ hairdresser.experience }}</td>
+                                    <td>{% if hairdresser.is_verified %}<span class="verified-badge"><i class="bi bi-patch-check-fill"></i> Verified</span>{% else %}<span class="status-pill">Unverified</span>{% endif %}</td>
+                                    <td>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <a href="{% url 'hairdresser_update' hairdresser.pk %}" class="btn btn-outline-brand btn-sm">Edit</a>
+                                            <form method="post" action="{% url 'hairdresser_delete' hairdresser.pk %}">
+                                                {% csrf_token %}
+                                                <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="5" class="text-muted-soft">No hairdresser data available.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="table-card">
+                <div class="page-topbar">
+                    <div>
+                        <h2 class="h4 mb-1">Bookings</h2>
+                        <p class="text-muted-soft mb-0">Assign hairdressers and update booking status here.</p>
+                    </div>
+                    <span class="status-pill"><i class="bi bi-hourglass-split"></i> Booking management</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr><th>Customer</th><th>Service</th><th>Hairdresser</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                                <tr>
+                                    <td>{{ booking.full_name }}</td>
+                                    <td>{{ booking.service.name }}</td>
+                                    <td>{% if booking.hairdresser %}{{ booking.hairdresser.name }}{% else %}<span class="text-muted-soft">Unassigned</span>{% endif %}</td>
+                                    <td>{{ booking.get_status_display }}</td>
+                                    <td>{{ booking.appointment_date }} {{ booking.appointment_time|time:"H:i" }}</td>
+                                    <td>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <a href="{% url 'booking_update' booking.pk %}" class="btn btn-outline-brand btn-sm">Edit</a>
+                                            <form method="post" action="{% url 'booking_admin_delete' booking.pk %}">
+                                                {% csrf_token %}
+                                                <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="6" class="text-muted-soft">No bookings available.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
